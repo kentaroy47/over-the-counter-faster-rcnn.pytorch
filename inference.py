@@ -2,13 +2,18 @@
 """
 Kentaro Yoshioka 2019/7/19
 """
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
 
+import sys
 import os
 import cv2
 import numpy as np
-
+import argparse
 from detector import faster_rcnn
 import time
+from scipy.misc import imread
 
 def parse_args():
   """
@@ -32,9 +37,11 @@ def parse_args():
 
 
 if __name__ == '__main__':
+  vis = True
   # define network
   fasterRCNN = faster_rcnn("res18", 'cfgs/res18.yml', "./faster_rcnn_500_40_625.pth", "aa", is_plot=True)
- 
+
+  args = parse_args() 
   webcam_num = args.webcam_num
   # Set up webcam or get image directories
   if webcam_num >= 0 :
@@ -49,9 +56,7 @@ if __name__ == '__main__':
     num_images2=num_images
   print('Loaded Photo: {} images.'.format(num_images))
   
-  # box to save images
-  allbox = [[[] for _ in xrange(num_images+1)]
-               for _ in xrange(len(pascal_classes))]
+  
   i = -1
   
   while (num_images > 00):
@@ -77,20 +82,14 @@ if __name__ == '__main__':
       im = im_in
       
       # infer network
-      all_boxes, im2show = fasterRCNN(im)
-
-      if webcam_num == -1:
-          sys.stdout.write('im_detect: {:d}/{:d} {:.3f}s {:.3f}s   \r' \
-                           .format(num_images + 1, len(imglist), detect_time, nms_time))
-          sys.stdout.flush()
+      im2show, _, _ = fasterRCNN(im)
 
       if vis and webcam_num == -1:
           # cv2.imshow('test', im2show)
           # cv2.waitKey(0)
           im2show = cv2.cvtColor(im2show, cv2.COLOR_BGR2RGB)
           result_path = os.path.join(args.image_dir, imglist[num_images][:-4] + "_det.jpg")
-          if args.imshow:
-              cv2.imwrite(result_path, im2show)
+          cv2.imwrite(result_path, im2show)
       else:
           if vis:
               cv2.imshow("frame", im2show)
@@ -103,9 +102,4 @@ if __name__ == '__main__':
   if webcam_num >= 0:
       cap.release()
       cv2.destroyAllWindows()
-  
-import pickle
-outfile = args.image_dir+"/det.pkl"
-with open(outfile, 'wb') as f:
-    pickle.dump(allbox, f, pickle.HIGHEST_PROTOCOL)
   

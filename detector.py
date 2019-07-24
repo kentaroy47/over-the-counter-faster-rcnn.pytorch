@@ -111,17 +111,17 @@ class faster_rcnn(object):
      # set network
      class_agnostic = False
      if net == 'vgg16':
-        self.net = vgg16(pascal_classes, pretrained=False, class_agnostic=class_agnostic)
+        self.net = vgg16(self.pascal_class, pretrained=False, class_agnostic=class_agnostic)
      elif net == 'res101':
-        self.net = resnet(pascal_classes, 101, pretrained=False, class_agnostic=class_agnostic)
+        self.net = resnet(self.pascal_class, 101, pretrained=False, class_agnostic=class_agnostic)
      elif net == 'res50':
-        self.net = resnet(pascal_classes, 50, pretrained=False, class_agnostic=class_agnostic)
+        self.net = resnet(self.pascal_class, 50, pretrained=False, class_agnostic=class_agnostic)
      elif net == 'res152':
-        self.net = resnet(pascal_classes, 152, pretrained=False, class_agnostic=class_agnostic)
+        self.net = resnet(self.pascal_class, 152, pretrained=False, class_agnostic=class_agnostic)
      elif net == 'res34':
-        self.net = resnet(pascal_classes, 34, pretrained=True, class_agnostic=class_agnostic)
+        self.net = resnet(self.pascal_class, 34, pretrained=True, class_agnostic=class_agnostic)
      elif net == 'res18':
-        self.net = resnet(pascal_classes, 18, pretrained=False, class_agnostic=class_agnostic)
+        self.net = resnet(self.pascal_class, 18, pretrained=False, class_agnostic=class_agnostic)
      
      # set cuda
      self.device = "cuda" if use_cuda else "cpu"
@@ -204,7 +204,7 @@ class faster_rcnn(object):
             else:
                 box_deltas = box_deltas.view(-1, 4) * torch.FloatTensor(cfg.TRAIN.BBOX_NORMALIZE_STDS) \
                            + torch.FloatTensor(cfg.TRAIN.BBOX_NORMALIZE_MEANS)
-            box_deltas = box_deltas.view(1, -1, 4 * 21)
+            box_deltas = box_deltas.view(1, -1, 4 * len(self.pascal_class))
           pred_boxes = bbox_transform_inv(boxes, box_deltas, 1)
           pred_boxes = clip_boxes(pred_boxes, im_info.data, 1)
       else:
@@ -216,7 +216,7 @@ class faster_rcnn(object):
       scores = scores.squeeze()
       pred_boxes = pred_boxes.squeeze()
   
-      im2show = np.copy(im)
+      im2show = np.copy(ori_img)
       for j in xrange(1, len(self.pascal_class)):
           inds = torch.nonzero(scores[:,j]>thresh).view(-1)
           # if there is det
