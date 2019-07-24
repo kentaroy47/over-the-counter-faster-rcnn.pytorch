@@ -92,12 +92,16 @@ def _get_image_blob(im):
 class faster_rcnn(object):
     def __init__(self, net, cfgfile, weightfile, namesfile, use_cuda=True, is_plot=False, is_xywh=False):
      # misc settings
-     pascal_classes = np.asarray(['__background__',
-                           'aeroplane', 'bicycle', 'bear', 'boat',
-                           'bottle', 'bus', 'car', 'cat', 'chair',
-                           'cow', 'diningtable', 'dog', 'horse',
-                           'motorbike', 'person', 'pottedplant',
-                           'sheep', 'sofa', 'train', 'truck'])
+     self.pascal_class = np.asarray(['__background__',"person","bicycle","car","motorbike","aeroplane","bus","train","truck","boat",
+                               "traffic light","fire hydrant","stop sign","parking meter","bench","bird","cat","dog","horse",
+                               "sheep","cow","elephant","bear","zebra","giraffe","backpack","umbrella","handbag","tie",
+                               "suitcase","frisbee","skis","snowboard","sports ball","kite","baseball bat",
+                               "baseball glove","skateboard","surfboard","tennis racket","bottle","wine glass",
+                               "cup","fork","knife","spoon","bowl","banana","apple","sandwich","orange","broccoli",
+                               "carrot","hot dog","pizza","donut","cake","chair","sofa","pottedplant","bed",
+                               "diningtable","toilet","tvmonitor","laptop","mouse","remote","keyboard","cell phone",
+                               "microwave","oven","toaster","sink",
+                               "refrigerator","book","clock","vase","scissors","teddy bear","hair drier","toothbrush"])
      cfg_from_file(cfgfile)
      set_cfgs = ['ANCHOR_SCALES', '[4, 8, 16, 32]', 'ANCHOR_RATIOS', '[0.5,1,2]', 'MAX_NUM_GT_BOXES', '50']
      cfg_from_list(set_cfgs)
@@ -211,9 +215,9 @@ class faster_rcnn(object):
 
       scores = scores.squeeze()
       pred_boxes = pred_boxes.squeeze()
-    
+  
       im2show = np.copy(im)
-      for j in xrange(1, len(pascal_class)):
+      for j in xrange(1, len(self.pascal_class)):
           inds = torch.nonzero(scores[:,j]>thresh).view(-1)
           # if there is det
           if inds.numel() > 0:
@@ -225,5 +229,5 @@ class faster_rcnn(object):
             cls_dets = cls_dets[order]
             keep = nms(cls_boxes[order, :], cls_scores[order], cfg.TEST.NMS)
             cls_dets = cls_dets[keep.view(-1).long()]
-            im2show = vis_detections(im2show, pascal_classes[j], cls_dets.cpu().numpy(), 0.5)
+            im2show = vis_detections(im2show, self.pascal_class[j], cls_dets.cpu().numpy(), 0.5)
       return im2show, pred_boxes, scores
