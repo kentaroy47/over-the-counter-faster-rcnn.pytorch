@@ -5,7 +5,6 @@ kentaroy47
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
-
 import _init_paths
 import os
 import sys
@@ -20,7 +19,6 @@ import torch
 from torch.autograd import Variable
 import torch.nn as nn
 import torch.optim as optim
-
 import torchvision.transforms as transforms
 import torchvision.datasets as dset
 from scipy.misc import imread
@@ -105,8 +103,6 @@ class faster_rcnn(object):
      cfg_from_list(set_cfgs)
      cfg.ANCHOR_SCALES = [4, 8, 16, 32]
      cfg.ANCHOR_RATIOS = [0.5,1,2]
-#     cfg.TRAIN.SCALES = (int(600),)
-#     cfg.TEST.SCALES = (int(600),)
      
      # set network
      class_agnostic = False
@@ -215,8 +211,9 @@ class faster_rcnn(object):
 
       scores = scores.squeeze()
       pred_boxes = pred_boxes.squeeze()
-
-      for j in xrange(1, 21):
+    
+      im2show = np.copy(im)
+      for j in xrange(1, len(pascal_class)):
           inds = torch.nonzero(scores[:,j]>thresh).view(-1)
           # if there is det
           if inds.numel() > 0:
@@ -228,41 +225,5 @@ class faster_rcnn(object):
             cls_dets = cls_dets[order]
             keep = nms(cls_boxes[order, :], cls_scores[order], cfg.TEST.NMS)
             cls_dets = cls_dets[keep.view(-1).long()]
-            a = cls_dets.cpu().numpy()
-#            print(a)
-            allbox.append(a)
-      else:
-                empty_array = np.transpose(np.array([[],[],[],[],[]]), (1,0))
-#                allbox.append(empty_array)
-#      try:
-      
-      allbox = np.asarray(allbox)
-      print(allbox)
-      print(allbox.shape)
-      try:
-          xyxy = allbox[0, :, 0:4]
-          conf = allbox[0, :, 4]
-      except:
-          xyxy = None
-          conf = None
-      return xyxy, conf
-
-if __name__ == '__main__':
-    yolo3 = faster_rcnn("res18", 'cfgs/vgg16.yml', "../models/faster_rcnn_hitachi_0718.pth", "aa", is_plot=True)
-#    print("yolo3.size =",yolo3.size)
-    import os
-    root = "../scene4img"
-    files = [os.path.join(root,file) for file in os.listdir(root)]
-    files.sort()
-    for filename in files:
-        img = cv2.imread(filename)
-        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-        res = yolo3(img)
-        # save results
-#        cv2.imwrite("../results/{}".format(os.path.basename(filename)),res[:,:,(2,1,0)])
-        # imshow
-        cv2.namedWindow("yolo3", cv2.WINDOW_NORMAL)
-        cv2.resizeWindow("yolo3", 600,600)
-        ori_im = draw_bboxes(img, np.asarray(res[0, :, 0:4]), None, offset=(0,0))
-        cv2.imshow("yolo3", ori_im)
-        cv2.waitKey(0)
+            im2show = vis_detections(im2show, pascal_classes[j], cls_dets.cpu().numpy(), 0.5)
+      return im2show, pred_boxes, scores
