@@ -1,10 +1,19 @@
 # what's this?
-simple over the counter faster rcnn!
-works with pytorch 1.0
+- Faster rcnn with run with least efforts, just follow the instructions :)
+- Works with pytorch 1.0
+- Models distributed
 
 # Install
-pip install -r requirements.txt
+install requirements.
 
+```
+pip install -r requirements.txt
+```
+
+Download pretrained coco model
+
+```
+wget https://www.dropbox.com/s/k68qq6wupseci7t/faster_rcnn_500_40_625.pth
 ```
 cd lib
 python setup.py build develop
