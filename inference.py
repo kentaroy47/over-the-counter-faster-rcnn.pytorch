@@ -82,8 +82,8 @@ if __name__ == '__main__':
       im = im_in
       
       # infer network
-      im2show, _, _ = fasterRCNN(im)
-
+      im2show, _, _, dets = fasterRCNN(im)
+      print(dets)
       if vis and webcam_num == -1:
           # cv2.imshow('test', im2show)
           # cv2.waitKey(0)
