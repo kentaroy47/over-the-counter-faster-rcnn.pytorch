@@ -230,4 +230,4 @@ class faster_rcnn(object):
             keep = nms(cls_boxes[order, :], cls_scores[order], cfg.TEST.NMS)
             cls_dets = cls_dets[keep.view(-1).long()]
             im2show = vis_detections(im2show, self.pascal_class[j], cls_dets.cpu().numpy(), 0.5)
-      return im2show, pred_boxes, scores
+      return im2show, pred_boxes, scores, cls_dets.cpu().numpy()
